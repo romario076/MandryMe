@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📶 WiFi Mapper
+# 📶 MandryMe
 
 **Discover, map, and share the best WiFi spots around you!**
 
