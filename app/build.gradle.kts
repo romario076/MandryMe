@@ -38,7 +38,7 @@ android {
         val variant = this
         outputs.all {
             val output = this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
-            output.outputFileName = "WifiMapper-${variant.name}-${variant.versionName}.apk"
+            output.outputFileName = "MandryMe-${variant.name}-${variant.versionName}.apk"
         }
     }
 }

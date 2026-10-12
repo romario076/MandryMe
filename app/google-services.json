@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "367819230285-dakuovacuchd2no3gukasrt18pnsd7au.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.melnykroman.wifimapper",
+            "certificate_hash": "000175c6fcd13fc6fc3f192c04cadd3ece30646a"
+          }
+        },
+        {
           "client_id": "367819230285-irt8nugnphbq6ns6c12btrgitrtseto7.apps.googleusercontent.com",
           "client_type": 3
         }

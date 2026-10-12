@@ -66,7 +66,7 @@ class WifiAutoTrackService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // Use a minimal, unobtrusive notification to satisfy Android Foreground Service requirements
-        startForeground(NOTIF_ID, buildNotification("WiFi Mapper", ""))
+        startForeground(NOTIF_ID, buildNotification("MandryMe", ""))
 
         val uid = auth.currentUser?.uid
         if (uid == null) {
@@ -375,12 +375,12 @@ class WifiAutoTrackService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Persistent silent foreground channel
             val foreground = NotificationChannel(
-                CHANNEL_ID, "Wi-Fi Auto Tracking", NotificationManager.IMPORTANCE_LOW
+                CHANNEL_ID, "MandryMe Auto Tracking", NotificationManager.IMPORTANCE_LOW
             ).apply { description = "Persistent notification while Auto-Tracking is enabled" }
 
             // High-importance alert channel for new/updated connections
             val alerts = NotificationChannel(
-                ALERT_CHANNEL_ID, "Wi-Fi Auto-Track Alerts", NotificationManager.IMPORTANCE_HIGH
+                ALERT_CHANNEL_ID, "MandryMe Auto-Track Alerts", NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Pops up when a new Wi-Fi is logged or a connection is updated"
                 enableVibration(true)

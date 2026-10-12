@@ -14,13 +14,16 @@ let currentMapLayer = null;
 let currentUser = null; // { uid, name, email, photo }
 
 const mapThemes = {
-    dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    voyager: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    dark: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    light: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    voyager: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
     street: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     esri_street: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-    topo: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+    topo: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+    satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    carto_dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    carto_light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    carto_voyager: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -801,7 +804,7 @@ window.onImportReady = async function (jsonStr) {
             if (document.getElementById('stats-view').classList.contains('active')) updateCharts();
             await customAlert(`Successfully imported ${importedCount} new locations.`);
         } catch (e) {
-            await customAlert("Failed to parse backup file. Please ensure it is a valid WiFiMapper JSON format.");
+            await customAlert("Failed to parse backup file. Please ensure it is a valid MandryMe JSON format.");
         }
     }
 };
@@ -984,6 +987,11 @@ function initSettings() {
 
     document.getElementById('map-theme-select').value = localStorage.getItem('mapTheme') || 'dark';
 
+    const cartoKeyInput = document.getElementById('carto-api-key-input');
+    if (cartoKeyInput) {
+        cartoKeyInput.value = localStorage.getItem('cartoApiKey') || '';
+    }
+
     const densitySelect = document.getElementById('cluster-density-select');
     if (densitySelect) {
         densitySelect.value = localStorage.getItem('clusterDensity') || '40';
@@ -1070,10 +1078,27 @@ function setupEventListeners() {
         });
     });
 
+    const saveCartoKeyBtn = document.getElementById('save-carto-key-btn');
+    const cartoKeyInput = document.getElementById('carto-api-key-input');
+    if (saveCartoKeyBtn && cartoKeyInput) {
+        saveCartoKeyBtn.addEventListener('click', () => {
+            const key = cartoKeyInput.value.trim();
+            localStorage.setItem('cartoApiKey', key);
+            setMapTheme(localStorage.getItem('mapTheme') || 'dark');
+            customAlert(key ? 'CARTO API Key збережено! Карти оновлено.' : 'CARTO API Key очищено. Використовуються карти без ключа.', 'Налаштування мапи');
+        });
+        cartoKeyInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveCartoKeyBtn.click();
+            }
+        });
+    }
+
     document.getElementById('map-theme-select').addEventListener('change', e => {
         setMapTheme(e.target.value);
         localStorage.setItem('mapTheme', e.target.value);
-        setTimeout(() => map.invalidateSize(), 150);
+        setTimeout(() => map && map.invalidateSize(), 150);
     });
 
     const publicToggle = document.getElementById('public-map-toggle');
@@ -1175,7 +1200,7 @@ function setupEventListeners() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(wifiPoints));
             const dl = document.createElement('a');
             dl.setAttribute("href", dataStr);
-            dl.setAttribute("download", "WiFiMapper_Backup.json");
+            dl.setAttribute("download", "MandryMe_Backup.json");
             dl.click();
         }
     });
@@ -1658,19 +1683,153 @@ function initMap() {
     setMapTheme(localStorage.getItem('mapTheme') || 'dark');
 }
 
-function setMapTheme(key) {
-    if (currentMapLayer) map.removeLayer(currentMapLayer);
-    currentMapLayer = L.tileLayer(mapThemes[key] || mapThemes.dark, {
-        attribution: '&copy; Leaflet contributors',
+function createMapLayer(key) {
+    const cartoKey = (localStorage.getItem('cartoApiKey') || '').trim();
+    const commonOpts = {
         subdomains: 'abcd',
         maxZoom: 20,
         maxNativeZoom: 19,
-        keepBuffer: 8,           // Keep more buffer tiles off-screen
-        updateWhenZooming: true, // Fetch new tiles DURING zoom (stops white squares)
-        updateWhenIdle: false,   // Start fetching before movement fully stops
-        updateInterval: 50,      // Fetch 4 times faster than default (50ms)
-        crossOrigin: true        // Hardware decoding enabled
-    }).addTo(map);
+        keepBuffer: 8,
+        updateWhenZooming: true,
+        updateWhenIdle: false,
+        updateInterval: 50,
+        crossOrigin: true
+    };
+
+    // Explicit CARTO styles
+    if (key === 'carto_dark') {
+        if (cartoKey) {
+            return L.tileLayer(`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(cartoKey)}`, {
+                ...commonOpts,
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+            });
+        }
+        customAlert('Для використання стилю CARTO Dark Matter потрібен безкоштовний API-ключ з carto.com/basemaps/apikey. Введіть його в налаштуваннях. Увімкнено альтернативну темну мапу без водяних знаків.', 'Потрібен CARTO API Key');
+    } else if (key === 'carto_light') {
+        if (cartoKey) {
+            return L.tileLayer(`https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(cartoKey)}`, {
+                ...commonOpts,
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+            });
+        }
+        customAlert('Для використання стилю CARTO Positron потрібен безкоштовний API-ключ з carto.com/basemaps/apikey. Введіть його в налаштуваннях. Увімкнено альтернативну світлу мапу без водяних знаків.', 'Потрібен CARTO API Key');
+    } else if (key === 'carto_voyager') {
+        if (cartoKey) {
+            return L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(cartoKey)}`, {
+                ...commonOpts,
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+            });
+        }
+        customAlert('Для використання стилю CARTO Voyager потрібен безкоштовний API-ключ з carto.com/basemaps/apikey. Введіть його в налаштуваннях. Увімкнено сучасну міську мапу Esri без водяних знаків.', 'Потрібен CARTO API Key');
+    }
+
+    // Dark theme (Default)
+    if (key === 'dark' || key === 'carto_dark') {
+        if (cartoKey && key === 'dark') {
+            return L.tileLayer(`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(cartoKey)}`, {
+                ...commonOpts,
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+            });
+        }
+        const baseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+            ...commonOpts,
+            maxNativeZoom: 16,
+            attribution: '&copy; Esri, HERE, Garmin, OpenStreetMap'
+        });
+        const refLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+            ...commonOpts,
+            maxNativeZoom: 16
+        });
+        return L.layerGroup([baseLayer, refLayer]);
+    }
+
+    // Light theme
+    if (key === 'light' || key === 'carto_light') {
+        if (cartoKey && key === 'light') {
+            return L.tileLayer(`https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(cartoKey)}`, {
+                ...commonOpts,
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+            });
+        }
+        const baseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+            ...commonOpts,
+            maxNativeZoom: 16,
+            attribution: '&copy; Esri, HERE, Garmin, OpenStreetMap'
+        });
+        const refLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+            ...commonOpts,
+            maxNativeZoom: 16
+        });
+        return L.layerGroup([baseLayer, refLayer]);
+    }
+
+    // OpenStreetMap
+    if (key === 'street') {
+        return L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            ...commonOpts,
+            maxZoom: 19,
+            maxNativeZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        });
+    }
+
+    // Modern Street
+    if (key === 'esri_street' || key === 'voyager' || key === 'carto_voyager') {
+        if (cartoKey && key === 'voyager') {
+            return L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(cartoKey)}`, {
+                ...commonOpts,
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+            });
+        }
+        return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            ...commonOpts,
+            maxZoom: 20,
+            maxNativeZoom: 19,
+            attribution: '&copy; Esri'
+        });
+    }
+
+    // Topographic
+    if (key === 'topo') {
+        return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+            ...commonOpts,
+            maxZoom: 20,
+            maxNativeZoom: 19,
+            attribution: '&copy; Esri, USGS, NOAA'
+        });
+    }
+
+    // Satellite
+    if (key === 'satellite') {
+        return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            ...commonOpts,
+            maxZoom: 20,
+            maxNativeZoom: 19,
+            attribution: '&copy; Esri, Maxar, Earthstar Geographics'
+        });
+    }
+
+    // Default fallback: dark canvas
+    const baseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        ...commonOpts,
+        maxNativeZoom: 16,
+        attribution: '&copy; Esri, HERE, Garmin, OpenStreetMap'
+    });
+    const refLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+        ...commonOpts,
+        maxNativeZoom: 16
+    });
+    return L.layerGroup([baseLayer, refLayer]);
+}
+
+function setMapTheme(key) {
+    if (currentMapLayer && map) {
+        map.removeLayer(currentMapLayer);
+    }
+    currentMapLayer = createMapLayer(key);
+    if (map && currentMapLayer) {
+        currentMapLayer.addTo(map);
+    }
 }
 
 let markerClusterGroup = null;

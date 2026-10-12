@@ -16,9 +16,9 @@
 
 ## 🌟 About The Project
 
-Welcome to **WiFi Mapper**! Tired of losing your connection or struggling to find a reliable network while on the go? This community-driven application empowers users to discover, map, and share WiFi networks in their vicinity. 
+Welcome to **MandryMe**! Tired of losing your connection or struggling to find a reliable network while on the go? This community-driven application empowers users to discover, map, and share WiFi networks in their vicinity. 
 
-Built natively for Android using modern development practices, WiFi Mapper combines a sleek user interface with powerful backend technologies to deliver a seamless experience. Whether you're a digital nomad, a student, or just someone who loves free WiFi, this app is your ultimate connectivity companion.
+Built natively for Android using modern development practices, MandryMe combines a sleek user interface with powerful backend technologies to deliver a seamless experience. Whether you're a digital nomad, a student, or just someone who loves free WiFi, this app is your ultimate connectivity companion.
 
 ## ✨ Key Features
 
@@ -53,8 +53,8 @@ Want to run the project locally or contribute? Follow these steps!
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/WiFiMapper.git
-   cd WiFiMapper
+   git clone https://github.com/yourusername/MandryMe.git
+   cd MandryMe
    ```
 
 2. **Set up Firebase:**

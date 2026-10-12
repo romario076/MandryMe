@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "WiFiMapper"
+rootProject.name = "MandryMe"
 include(":app")

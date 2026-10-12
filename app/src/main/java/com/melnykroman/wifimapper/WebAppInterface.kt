@@ -224,7 +224,7 @@ class WebAppInterface(
             val intent = android.content.Intent(android.content.Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(android.content.Intent.CATEGORY_OPENABLE)
                 type = "application/json"
-                putExtra(android.content.Intent.EXTRA_TITLE, "WiFiMapper_Backup.json")
+                putExtra(android.content.Intent.EXTRA_TITLE, "MandryMe_Backup.json")
             }
             activity.startActivityForResult(intent, 9002)
         }

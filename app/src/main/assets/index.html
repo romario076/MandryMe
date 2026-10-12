@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WiFi Mapper &amp; Analytics</title>
+    <title>MandryMe &amp; Analytics</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
@@ -18,7 +18,7 @@
     <div id="login-overlay" class="login-overlay hidden">
         <div class="login-card glass-panel">
             <div class="login-logo">📡</div>
-            <h1 class="login-title">WiFi <span>Mapper</span></h1>
+            <h1 class="login-title">Mandry<span>Me</span></h1>
             <p class="login-subtitle">Map your connections, sync across devices</p>
             <button id="google-signin-btn" class="btn-google">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -47,7 +47,7 @@
         <nav class="sidebar">
             <div class="sidebar-header">
                 <h1 class="logo" style="display: flex; align-items: center; gap: 8px;">
-                    <span>WiFi <span style="color: var(--teal);">Mapper</span></span>
+                    <span>Mandry<span style="color: var(--teal);">Me</span></span>
                     <svg width="32" height="32" viewBox="0 0 24 24"
                         style="filter: drop-shadow(0 0 4px rgba(20, 184, 166, 0.4)); margin-top:-2px;">
                         <path d="M9.5 22L11 11H13L14.5 22H9.5Z" fill="url(#tower)" />
@@ -200,14 +200,26 @@
                         <div class="form-group">
                             <label for="map-theme-select">Map Theme:</label>
                             <select id="map-theme-select" class="form-control">
-                                <option value="dark">Dark Matter (CartoDB)</option>
-                                <option value="light">Positron (CartoDB)</option>
-                                <option value="voyager">Voyager (CartoDB)</option>
-                                <option value="street">Street Map (OSM)</option>
-                                <option value="esri_street">Modern Street (Esri)</option>
-                                <option value="topo">Topographic (OpenTopoMap)</option>
-                                <option value="satellite">Satellite (Esri)</option>
+                                <option value="dark">Dark Canvas (Esri - За замовчуванням / Без ключа)</option>
+                                <option value="light">Light Canvas (Esri - Без ключа)</option>
+                                <option value="street">Street Map (OpenStreetMap - Без ключа)</option>
+                                <option value="esri_street">Modern Street (Esri - Без ключа)</option>
+                                <option value="topo">Topographic (Esri Topo - Без ключа)</option>
+                                <option value="satellite">Satellite (Esri Imagery - Без ключа)</option>
+                                <option value="carto_dark">Dark Matter (CARTO - Потрібен API ключ)</option>
+                                <option value="carto_light">Positron (CARTO - Потрібен API ключ)</option>
+                                <option value="carto_voyager">Voyager (CARTO - Потрібен API ключ)</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="carto-api-key-input">CARTO Basemaps API Key (Опціонально):</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="carto-api-key-input" class="form-control" placeholder="Введіть API ключ CARTO" style="flex: 1;" />
+                                <button type="button" id="save-carto-key-btn" class="btn primary" style="padding: 8px 16px; white-space: nowrap; font-size: 0.85rem;">Зберегти</button>
+                            </div>
+                            <small style="color: var(--slate-light); font-size: 0.8rem; display: block; margin-top: 6px; line-height: 1.4;">
+                                Сервіс CARTO вимагає безкоштовний API-ключ з <a href="https://carto.com/basemaps/apikey" target="_blank" style="color: var(--teal); text-decoration: underline;">carto.com/basemaps/apikey</a>. Якщо ключ не вказано, додаток автоматично використовує карти Esri та OSM без водяних знаків.
+                            </small>
                         </div>
                         <div class="form-group">
                             <label for="cluster-density-select">Grouping Density (Zoom out):</label>
@@ -395,7 +407,7 @@
                 <div style="padding: 1.5rem 1rem 0.5rem;">
                     <h2
                         style="font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px; filter: drop-shadow(0 0 12px rgba(20,184,166,0.35));">
-                        WiFi Mapper <span style="font-size: 1.4rem;">🌍</span>
+                        MandryMe <span style="font-size: 1.4rem;">🌍</span>
                     </h2>
                     <p style="color: var(--slate-light); font-size: 0.88rem; margin-top: 4px; line-height: 1.5;">
                         Your personal atlas of the connected world — built automatically, every day.
@@ -407,7 +419,7 @@
                     style="margin: 0.75rem 1rem; background: linear-gradient(135deg, rgba(20,184,166,0.13) 0%, rgba(99,102,241,0.13) 100%); border: 1px solid rgba(20,184,166,0.3); text-align: center; padding: 1.2rem 1rem;">
                     <p style="font-size: 1rem; font-weight: 600; color: #fff; line-height: 1.7; margin: 0;">
                         Every Wi-Fi you connect to is a moment in time.<br>
-                        <span style="color: var(--teal);">WiFi Mapper</span> turns those moments into
+                        <span style="color: var(--teal);">MandryMe</span> turns those moments into
                         <span style="color: #818cf8;">a beautiful, living story</span> of everywhere you've been.
                     </p>
                 </div>
